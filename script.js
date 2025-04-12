@@ -11,9 +11,9 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
-// this function uses the geolocation API to retrieve the current coords based
+// (1) this function uses the geolocation API to retrieve the current coords based
 // on your location then it punches that into leaflet so we can display a map
-
+let map;
 //if the geolocation object even exists
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
@@ -25,8 +25,10 @@ if (navigator.geolocation) {
       const coords = [latitude, longitude];
 
       //returns the map object
-      const map = L.map('map').setView(coords, 13);
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      map = L.map('map').setView(coords, 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        // !! change the map later
         //can change the map style here
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -36,6 +38,29 @@ if (navigator.geolocation) {
         .addTo(map)
         .bindPopup('A pretty CSS popup.<br> Easily customizable.')
         .openPopup();
+
+      // (2) this function creates a marker
+      // every time you click the map renders a marker there
+      map.on('click', function (mapEvent) {
+        console.log(mapEvent);
+        const { lat, lng } = mapEvent.latlng;
+        console.log(lat, lng);
+        //
+        //adding the marker
+        L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(
+            L.popup({
+              minWidth: 100,
+              maxWidth: 250,
+              autoClose: false,
+              closeOnClick: false,
+              className: `running-popup`,
+            })
+          )
+          .setPopupContent(`work out`)
+          .openPopup();
+      });
     },
     //else function
     function () {
