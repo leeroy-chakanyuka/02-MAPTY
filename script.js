@@ -20,11 +20,13 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+
 function genID() {
   const timestamp = Date.now().toString(36);
   const randomPart = Math.random().toString(36).substring(2, 10);
   return `${timestamp}-${randomPart}`;
 }
+
 class Workout {
   id = genID(); // so we can find a certain object by ID
   date = new Date();
@@ -78,6 +80,7 @@ class Cycling extends Workout {
 class App {
   #map;
   #mapEvent;
+  #workouts = [];
 
   constructor() {
     this.#getPosition();
@@ -119,8 +122,6 @@ class App {
     this.#mapEvent = e;
     form.classList.remove(`hidden`);
     inputDistance.focus();
-    console.log(e);
-    console.log(this.#mapEvent);
   }
 
   #toggleElevationField() {
@@ -131,13 +132,60 @@ class App {
   #newWorkout(e) {
     e.preventDefault();
 
+    let workout;
+    const { lat, lng } = this.#mapEvent.latlng;
+    const validateData = (...inputs) =>
+      inputs.every(inp => Number.isFinite(inp));
+
+    const allPositives = (...inputs) => inputs.every(inp => inp > 0);
+
+    // get data from form
+
+    const typeWorkout = inputType.value;
+    const distance = +inputDistance.value;
+    const duration = +inputDuration.value;
+
+    // if running == running object
+
+    if (typeWorkout == `running`) {
+      const cadence = +inputCadence.value;
+      if (
+        !validateData(distance, duration, cadence) ||
+        !allPositives(distance, duration, cadence)
+      ) {
+        return alert('One of the inputs is not a valid number');
+      }
+      workout = new Running([lat, lng], distance, duration, cadence);
+    }
+
+    // if cycling == cycling object
+    console.log(`in show form`);
+    if (typeWorkout == `cycling`) {
+      const evelevationGain = +inputElevation.value;
+      if (
+        !validateData(distance, duration, evelevationGain) ||
+        !allPositives(distance, duration)
+      ) {
+        return alert('One of the inputs is not a valid number');
+      }
+      workout = new Cycling([lat, lng], distance, duration, evelevationGain);
+    }
+
+    // add workout to obkect
+    this.#workouts.push(workout);
+    // render workout on map as a marker
+    this.#renderWorkoutMarker;
+    // render workout on sidebar
+
+    // hide form and clear input fields
+
+    // display marker
+
     inputDistance.focus();
     inputCadence.value = '';
     inputDistance.value = '';
     inputDuration.value = '';
     inputElevation.value = '';
-
-    const { lat, lng } = this.#mapEvent.latlng;
 
     L.marker([lat, lng])
       .addTo(this.#map)
@@ -147,12 +195,14 @@ class App {
           maxWidth: 250,
           autoClose: false,
           closeOnClick: false,
-          className: `running-popup`,
+          className: `${typeWorkout}-popup`,
         })
       )
       .setPopupContent(`work out`)
       .openPopup();
   }
+  #renderWorkoutMarker() {}
+  #renderWorkout(workout) {}
 }
 
 const myApp = new App();
