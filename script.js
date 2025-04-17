@@ -27,7 +27,8 @@ class App {
 
   constructor() {
     this.#getPosition();
-    form.addEventListener('submit', this.#newWorkout(e));
+    form.addEventListener('submit', this.#newWorkout.bind(this));
+    inputType.addEventListener('change', this.#toggleElevationField);
   }
 
   #getPosition() {
@@ -56,19 +57,22 @@ class App {
       .addTo(this.#map)
       .bindPopup('A pretty CSS popup.<br> Easily customizable.')
       .openPopup();
+
+    this.#map.on('click', this.#showForm.bind(this));
   }
 
-  #showForm() {
-    this.#map.on('click', function (e) {
-      this.#mapEvent = e;
-      form.classList.remove(`hidden`);
-      inputDistance.focus();
-      console.log(e);
-      console.log(this.#mapEvent);
-    });
+  #showForm(e) {
+    this.#mapEvent = e;
+    form.classList.remove(`hidden`);
+    inputDistance.focus();
+    console.log(e);
+    console.log(this.#mapEvent);
   }
 
-  #toggleElevationField() {}
+  #toggleElevationField() {
+    inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+    inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+  }
 
   #newWorkout(e) {
     e.preventDefault();
@@ -79,7 +83,7 @@ class App {
     inputDuration.value = '';
     inputElevation.value = '';
 
-    const { lat, lng } = mapEvent.latlng;
+    const { lat, lng } = this.#mapEvent.latlng;
 
     L.marker([lat, lng])
       .addTo(this.#map)
