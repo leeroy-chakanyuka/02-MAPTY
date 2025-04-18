@@ -79,11 +79,13 @@ class App {
   #map;
   #mapEvent;
   #workouts = [];
+  #mapZoomLevel = 14;
 
   constructor() {
     this.#getPosition();
     form.addEventListener('submit', this.#newWorkout.bind(this));
     inputType.addEventListener('change', this.#toggleElevationField);
+    containerWorkouts.addEventListener('click', this.#moveToPopup.bind(this));
   }
 
   #getPosition() {
@@ -190,6 +192,7 @@ class App {
     this.#renderWorkout(workout);
     // hide form and clear input fields
     this.#hideForm();
+    //set local storage
   }
 
   #renderWorkoutMarker(workout) {
@@ -256,6 +259,27 @@ class App {
 
     form.insertAdjacentHTML('afterend', html);
   }
+
+  #moveToPopup(e) {
+    if (!this.#map) return;
+
+    const workoutEl = e.target.closest('.workout');
+
+    if (!workoutEl) return;
+
+    const workout = this.#workouts.find(
+      work => work.id === workoutEl.dataset.id
+    );
+
+    this.#map.setView(workout.coords, this.#mapZoomLevel, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
+  }
+
+  setLocalStorage() {}
 }
 
 const myApp = new App();
