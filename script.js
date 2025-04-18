@@ -45,6 +45,7 @@ class Running extends Workout {
   #name;
   #cadence;
   #pace;
+  type = 'running';
 
   constructor(coords, distance, duration, cadence) {
     super(coords, distance, duration);
@@ -63,6 +64,7 @@ class Cycling extends Workout {
   #name;
   #elevationGain;
   #speed;
+  type = 'cycling';
 
   constructor(coords, distance, duration, elevationGain) {
     super(coords, distance, duration);
@@ -173,8 +175,9 @@ class App {
 
     // add workout to obkect
     this.#workouts.push(workout);
+    console.log(this.#workouts);
     // render workout on map as a marker
-    this.#renderWorkoutMarker;
+    this.#renderWorkoutMarker(workout);
     // render workout on sidebar
 
     // hide form and clear input fields
@@ -186,8 +189,23 @@ class App {
     inputDistance.value = '';
     inputDuration.value = '';
     inputElevation.value = '';
+  }
 
-    L.marker([lat, lng])
+  #renderWorkoutMarker(workout) {
+    let msg;
+    if (workout.type == `running`) {
+      msg = `🏃‍♀️ ${
+        workout.type.charAt(0).toUpperCase() + workout.type.slice(1)
+      } on ${workout.date}`;
+    }
+
+    if (workout.type == 'cycling') {
+      msg = `🚴‍♀️ ${
+        workout.type.charAt(0).toUpperCase() + workout.type.slice(1)
+      } on ${workout.date}`;
+    }
+
+    L.marker(workout.coords)
       .addTo(this.#map)
       .bindPopup(
         L.popup({
@@ -195,14 +213,27 @@ class App {
           maxWidth: 250,
           autoClose: false,
           closeOnClick: false,
-          className: `${typeWorkout}-popup`,
+          className: `${workout.type}-popup`,
         })
       )
-      .setPopupContent(`work out`)
+      .setPopupContent(msg)
       .openPopup();
   }
-  #renderWorkoutMarker() {}
-  #renderWorkout(workout) {}
+
+  #renderWorkout(workout) {
+    const html = ` <li class="workout workout--${workout.type}" data-id=${workout.id}>
+          <h2 class="workout__title">Running on April 14</h2>
+          <div class="workout__details">
+            <span class="workout__icon">🏃‍♂️</span>
+            <span class="workout__value">${workout.distance}</span>
+            <span class="workout__unit">km</span>
+          </div>
+          <div class="workout__details">
+            <span class="workout__icon">⏱</span>
+            <span class="workout__value">${workout.duration}</span>
+            <span class="workout__unit">min</span>
+          </div>`;
+  }
 }
 
 const myApp = new App();
