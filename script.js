@@ -193,6 +193,9 @@ class App {
     // hide form and clear input fields
     this.#hideForm();
     //set local storage
+    this.#setLocalStorage;
+    //get data from local storage
+    this.#getLocalStorage();
   }
 
   #renderWorkoutMarker(workout) {
@@ -279,15 +282,11 @@ class App {
     });
   }
 
-  setLocalStorage() {
+  #setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
   }
 
-  _setLocalStorage() {
-    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
-  }
-
-  _getLocalStorage() {
+  #getLocalStorage() {
     const data = JSON.parse(localStorage.getItem('workouts'));
 
     if (!data) return;
@@ -295,8 +294,13 @@ class App {
     this.#workouts = data;
 
     this.#workouts.forEach(work => {
-      this._renderWorkout(work);
+      this.#renderWorkout(work);
     });
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
